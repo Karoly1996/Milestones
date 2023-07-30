@@ -1,9 +1,9 @@
 /*/////////////////////////////////////////////////////////////////////////
                         Assignment 1 - Milestone 2
-Full Name  :
-Student ID#:
-Email      :
-Section    :
+Full Name  : Karoly Nemeth
+Student ID#: 021949144
+Email      : knemeth@myseneca.ca  
+Section    : NDD
 
 Authenticity Declaration:
 I declare this submission is the result of my own work and has not been
@@ -41,13 +41,17 @@ piece of work is entirely of my own creation.
 // Data type: Phone
 // ToDo:
 struct Phone {
-    
+    char description[20];
+    char number[11];
 };
-
 
 // Data type: Patient 
 // ToDo:
-
+struct Patient {
+    int patientNumber;
+    char name[NAME_LEN];
+    struct Phone phone;
+};
 
 // ClinicData type: Provided to student
 // !!! DO NOT MODIFY THIS DATA TYPE !!!
