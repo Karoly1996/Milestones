@@ -47,12 +47,13 @@ int compareAppointments(const void* a, const void* b) {
     }
 
     // compare by time
-    return (apptA->time.hour * 60 + apptA->time.min) - (apptB->time.hour * 60 + apptB->time.min);
+    return (apptA->time.hour * 60 + apptA->time.min) - 
+        (apptB->time.hour * 60 + apptB->time.min);
 }
 
 // function to sort appointments array by time
 void sortAppointments(struct Appointment appoints[], int max) {
-   // Use qsort with compareAppointments as the comparison function
+   // qsort with compareAppointments as the comparison function
     qsort(appoints, max, sizeof(struct Appointment), compareAppointments);
 }
 
@@ -559,7 +560,6 @@ void viewAppointmentSchedule(struct ClinicData* data) {
     sortAppointments(data->appointments, data->maxAppointments);
 
     // Display patient header
-    // 0 display without date
     displayScheduleTableHeader(&date, 0);
 
     // start loop to display patient appointments
@@ -581,6 +581,7 @@ void viewAppointmentSchedule(struct ClinicData* data) {
             }
         } 
     }
+    printf("\n");
 
 
 }
@@ -588,15 +589,186 @@ void viewAppointmentSchedule(struct ClinicData* data) {
 // Add an appointment record to the appointment array
 // Todo:
 void addAppointment(struct Appointment appoints[], int maxAppointments,
-                           struct Patient patients[], int maxPatient) {
-    
+                    struct Patient patients[], int maxPatient) {
+    // Declare variables
+    int patientNumber;
+    int patientIndex;
+    struct Date date;
+    struct Time time;
+    int day = 31;
+    int available = 1;
+
+    // Timeslot variables
+    int i;
+    int timeAvailable = 0;
+    int index = 0;
+
+    // Get patient number
+    printf("Patient Number: ");
+    scanf("%d", &patientNumber);
+
+    // Find patient number in patient array
+    // split line to not exceed 80 characters
+    patientIndex = findPatientIndexByPatientNum(patientNumber,
+                                                patients, maxPatient);
+
+    // Checking to make sure patientIndex is not -1
+    if (patientIndex >= 0) {
+        // Start loop if true
+        while (available) {
+            // Taking the year as input
+            printf("Year        : ");
+            date.year = inputIntPositive();
+
+            // Taking the month as input
+            printf("Month (1-12): ");
+            date.month = inputIntRange(1, 12);
+
+            // Determine the last day of the selected month and year
+            day = lastDay(date.year, date.month);
+
+            // Taking the day as input
+            printf("Day (1-%d)  : ", day);
+            date.day = inputIntRange(1, day);
+
+            // input for hour
+            printf("Hour (0-23)  : ");
+            time.hour = inputIntRange(0, 23);
+
+            //input for minute
+            printf("Minute (0-59): ");
+            time.min = inputIntRange(0, 59);
+
+            // Check if time slot is available
+            timeAvailable = 0; 
+            for (i = 0; i < maxAppointments; i++) {
+                if (date.year == appoints[i].date.year &&
+                    date.month == appoints[i].date.month &&
+                    date.day == appoints[i].date.day &&
+                    time.hour == appoints[i].time.hour &&
+                    time.min == appoints[i].time.min) {
+                    // Unavailable slot 
+                    timeAvailable = 1;
+                    break;
+                }
+            }
+
+            // Print error if timeslot is not available
+            if (timeAvailable) {
+                printf("\n");
+                printf("ERROR: Appointment timeslot is not available!\n\n");
+            } else {
+                // Display next available timeslot
+                while ((time.hour < START || time.hour > END) ||
+                       (time.hour == END && time.min > 0) ||
+                       (time.min % MIN != 0)) {
+                    printf("ERROR: Time must be between %02d:00 and %02d:00 "
+                        "in %02d minute intervals.\n\n", START, END, MIN);
+                    printf("Hour (0-23)  : ");
+                    scanf("%d", &time.hour);
+                    printf("Minute (0-59): ");
+                    scanf("%d", &time.min);
+                }
+                // break loop once input is valid
+                break;
+            }
+        }
+        // Find the next available slot
+        while (index < maxAppointments) {
+            if (appoints[index].patientNumber < 1) {
+                break;
+            }
+            index++;
+        }
+        // Schedule the appointment
+        if (index < maxAppointments) {
+            appoints[index].date = date;
+            appoints[index].time = time;
+            appoints[index].patientNumber = patientNumber;
+            // print scheduled message
+            printf("\n*** Appointment scheduled! ***\n\n");
+        }
+        clearInputBuffer();
+        return;
+    }
 }
 
 // Remove an appointment record from the appointment array
 // Todo:
 void removeAppointment(struct Appointment appoints[], int maxAppointments,
                            struct Patient patients[], int maxPatient) {
-    printf("Needs to be coded");
+    // Variables
+    int patientNumber;
+    int patientIndex;
+    struct Date date;
+    int day = 31;
+    int valid = 0;
+    int i;
+
+    // get patient number input
+    printf("Patient Number: ");
+    patientNumber = inputIntPositive();
+
+    // find patient
+    patientIndex = findPatientIndexByPatientNum(patientNumber, 
+                                                patients, maxPatient);
+    // Patient not found 
+    if (patientIndex < 0) {
+        printf("ERROR: Patient record not found!\n\n");
+        return;
+    }
+
+    // Continue if patient is found
+    // Get input for year
+    printf("Year        : ");
+    date.year = inputIntPositive();
+
+    // Get input for Month
+    printf("Month (1-12): ");
+    date.month = inputIntRange(1, 12);
+
+    // Determine the last day of the selected month and year
+    day = lastDay(date.year, date.month);
+    // get input for day
+    printf("Day (1-%d)  : ", day);
+    date.day = inputIntRange(1, day);
+    printf("\n");
+
+    // validate appointment
+    for (i = 0; i < maxAppointments; i++) {
+        if (appoints[i].patientNumber == patientNumber &&
+            appoints[i].date.year == date.year &&
+            appoints[i].date.month == date.month &&
+            appoints[i].date.day == date.day) {
+            // valid = 1
+            valid++;
+            // end iteration 
+            break;
+            }
+    }
+
+    // Check if a valid appointment was found
+    if (valid) {
+        // Display patient data
+        displayPatientData(&patients[patientIndex], FMT_FORM);
+
+        // Confirm removal
+        printf("Are you sure you want to remove this appointment (y,n): ");
+        char confirmation = inputCharOption("yn");
+        if (confirmation == 'y') {
+            // Remove the appointment by setting patient number to 0
+            for (i = 0; i < maxAppointments; i++) {
+                if (appoints[i].patientNumber == patientNumber &&
+                    appoints[i].date.year == date.year &&
+                    appoints[i].date.month == date.month &&
+                    appoints[i].date.day == date.day) {
+                    appoints[i].patientNumber = 0;
+                    printf("\nAppointment record has been removed!\n\n");
+                    break;
+                }
+            }
+        }
+    }
 }
 
 //////////////////////////////////////

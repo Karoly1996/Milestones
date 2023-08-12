@@ -36,6 +36,9 @@ piece of work is entirely of my own creation.
 
 // MS#3 Additional macro's:
 // ToDo:
+#define START 10
+#define END 14
+#define MIN 30
 
 
 //////////////////////////////////////
@@ -94,7 +97,18 @@ struct ClinicData
     int maxAppointments;
 };
 
+//////////////////////////////////////
+// ADDITIONAL FUNCTIONS ADDED BY KAROLY NEMETH
+//////////////////////////////////////
 
+// function to compare appointments
+int compareAppointments(const void* a, const void* b);
+
+// function to sort appointments array by time
+void sortAppointments(struct Appointment appoints[], int max);
+
+// Function to get the last day of the month based on the year and month
+int lastDay(int year, int month);
 
 //////////////////////////////////////
 // DISPLAY FUNCTIONS

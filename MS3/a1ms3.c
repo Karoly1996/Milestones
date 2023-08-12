@@ -33,7 +33,7 @@ int main(void)
 
     printf("Imported %d patient records...\n", patientCount);
     printf("Imported %d appointment records...\n\n", appointmentCount);
-
+    
     menuMain(&data);
     
     return 0;
