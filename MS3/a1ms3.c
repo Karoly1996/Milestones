@@ -14,7 +14,7 @@
 #include <ctype.h>
 
 #include "clinic.h"
-// ADDED
+
 #include "clinic.c"
 #include "core.c"
 
